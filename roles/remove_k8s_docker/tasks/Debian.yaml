@@ -1,0 +1,23 @@
+---
+
+- name: Remove hold on k8s packages
+  become: true
+  command: "apt-mark unhold kube*"
+  ignore_errors: true
+
+- name: Uninstall Docker and K8s packages
+  become: true
+  apt:
+    state: absent
+    purge: true
+    autoremove: true
+    name:
+    - kubectl
+    - kubelet
+    - kubernetes-cni
+    - kube*
+    - docker
+    - docker.io
+    - docker-engine
+    - containerd
+    - runc

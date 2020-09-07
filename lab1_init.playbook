@@ -1,0 +1,12 @@
+---
+
+- hosts: lab1
+  vars_files:
+  - ~/.secrets/ansible_auth.yaml
+  - control_vars.yaml
+  roles:
+  - os_init
+  - remove_k8s_docker
+  - install_docker
+  - install_k8s
+  - configure_k8s

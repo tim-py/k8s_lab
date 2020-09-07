@@ -1,0 +1,38 @@
+---
+
+- include_tasks: "{{ ansible_os_family }}.yaml"
+
+- name: Disable and shutdown ufw
+  become: true
+  systemd:
+    enabled: no
+    state: stopped
+    name: ufw
+  ignore_errors: true
+
+
+- name: Enable and start iscsid
+  become: true
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: started
+    name: iscsid
+
+
+- name: Enable and start multipathd
+  become: true
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: started
+    name: multipathd
+
+
+- name: Enable and start iscsi
+  become: true
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: started
+    name: iscsi

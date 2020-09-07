@@ -1,0 +1,49 @@
+---
+
+- name: Init K8s cluster
+  become: true
+  command: "kubeadm init --pod-network-cidr=192.168.0.0/16"
+  register: output
+
+- debug: msg="sysctl='{{ output.stdout }}'"
+
+- name: Create ~/.kube directory
+  file:
+    path: "{{ ansible_user_dir }}/.kube"
+    state: directory
+
+- name: Get the users primery group
+  command: "id -g"
+  register: group_command
+
+- set_fact:
+    user_group_id: "{{ group_command.stdout }}"
+
+- debug: msg="user's primery group='{{ user_group_id }}'"
+
+- name: Copy admin.conf to ~/.kube
+  become: true
+  copy:
+    remote_src: true
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ ansible_user_dir }}/.kube/config"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ user_group_id }}"
+
+- name: Install Tigera Calico operator
+  command: "kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml"
+  register: output
+
+- debug: msg="Install Tigera='{{ output.stdout }}'"
+
+- name: Install Calico
+  command: "kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml"
+  register: output
+
+- debug: msg="Install Calico='{{ output.stdout }}'"
+
+- name: Untaint master for single node cluster
+  command: "kubectl taint nodes --all node-role.kubernetes.io/master-"
+  register: output
+
+- debug: msg="Untaint master='{{ output.stdout }}'"

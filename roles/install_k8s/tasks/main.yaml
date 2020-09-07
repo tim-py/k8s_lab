@@ -1,0 +1,26 @@
+---
+
+- name: Configure sysctl file for Kernel Bridging
+  become: true
+  copy:
+    content: |
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+    dest: /etc/sysctl.d/k8s.conf
+
+- name: Load systctl from files
+  become: true
+  command: "sysctl --system"
+  register: output
+
+- debug: msg="sysctl='{{ output.stdout }}'"
+
+- include_tasks: "{{ ansible_os_family }}.yaml"
+
+- name: Start and enable kubelet
+  become: true
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: started
+    name: kubelet

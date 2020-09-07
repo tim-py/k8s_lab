@@ -1,0 +1,38 @@
+---
+
+- include_tasks: "{{ ansible_os_family }}.yaml"
+
+- name: Configure docker daemon.json
+  become: true
+  copy:
+    content: |
+      {
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "100m"
+        },
+        "storage-driver": "overlay2"
+      }
+    dest: /etc/docker/daemon.json
+
+- name: Create docker systemd
+  become: true
+  command: "mkdir -p /etc/systemd/system/docker.service.d"
+  register: output
+
+- debug: msg="Docker version='{{ output.stdout }}'"
+
+- name: Restart docker
+  become: true
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+    name: docker
+
+- name: Get Docker version
+  command: "docker --version"
+  register: output
+
+- debug: msg="Docker version='{{ output.stdout }}'"

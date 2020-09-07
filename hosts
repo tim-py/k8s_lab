@@ -1,0 +1,8 @@
+[lab1]
+127.0.0.1
+
+[lab1:vars]
+ansible_port=2201
+ansible_user=user
+ansible_ssh_private_key_file=~/.ssh/lab_rsa
+ansible_ssh_common_args="-o StrictHostKeyChecking=no -o  UserKnownHostsFile=/dev/null"

@@ -1,0 +1,65 @@
+---
+
+- name: Update apt cache
+  become: true
+  apt:
+    update_cache: yes
+
+- name: Install K8s OS package dependencies
+  become: true
+  apt:
+    state: present
+    name:
+      - apt-transport-https
+      - curl
+
+- name: Import K8s apt key
+  become: true
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Get Ubuntu version name
+  command: "lsb_release -cs"
+  register: release_output
+
+- debug: msg="release name='{{ release_output.stdout }}'"
+
+- name: Install K8s repository
+  become: true
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: kubernetes.list
+
+- name: Update apt cache
+  become: true
+  apt:
+    update_cache: yes
+
+- name: Install K8s
+  become: true
+  apt:
+    state: present
+    name:
+      - kubelet={{ k8s_version }}
+      - kubeadm={{ k8s_version }}
+      - kubectl={{ k8s_version }}
+
+- name: Prevent kubelet from being upgraded
+  become: true
+  dpkg_selections:
+    name: kubelet
+    selection: hold
+
+- name: Prevent kubeadm from being upgraded
+  become: true
+  dpkg_selections:
+    name: kubeadm
+    selection: hold
+
+- name: Prevent kubectl from being upgraded
+  become: true
+  dpkg_selections:
+    name: kubectl
+    selection: hold

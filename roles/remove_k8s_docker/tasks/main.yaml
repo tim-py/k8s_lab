@@ -1,0 +1,12 @@
+---
+
+- name: Unconfigure K8s cluster
+  become: true
+  command: "kubeadm reset -f"
+  ignore_errors: true
+
+- include_tasks: "{{ ansible_os_family }}.yaml"
+
+- name: remove .kube directory
+  command: "rm -rf ~/.kube"
+  ignore_errors: true
